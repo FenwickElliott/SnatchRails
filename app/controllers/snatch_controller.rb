@@ -12,6 +12,11 @@ class SnatchController < ApplicationController
         Authorization: "Authorization: Bearer #{session[:token]}"
       }
       get_me
+      if current_user
+        session[:p_name] = JSON.parse(current_user.settings)["p_name"]
+      else
+        session[:p_name] = "Snatched"
+      end
     end
   end
 
@@ -24,8 +29,10 @@ class SnatchController < ApplicationController
       p_set["p_name"] = params[:session][:p_name]
       current_user.settings = p_set.to_json
       current_user.save!
+      session[:p_name] = JSON.parse(current_user.settings)["p_name"]
+      flash[:notice] =  "Playlist name update to #{session[:p_name]}"
     end
-    redirect_to options_path
+    redirect_to root_path
   end
 
 
@@ -44,8 +51,6 @@ class SnatchController < ApplicationController
       # actually_snatch
       redirect_to root_path
     rescue
-      # flash[:alert] = "Error guest_snatching"
-      # redirect_to root_path
     end
   end
 
@@ -53,7 +58,7 @@ class SnatchController < ApplicationController
     unless session[:user_id]
       redirect_to "/auth/spotify"
     end
-    session[:p_name] = JSON.parse(current_user.settings)["p_name"]
+    
     begin
       get_song
       check_for_playlist
@@ -61,8 +66,6 @@ class SnatchController < ApplicationController
       # actually_snatch
       redirect_to root_path
     rescue
-      flash[:alert] = "Error snatching"
-      # redirect_to root_path
     end
   end
 
@@ -87,9 +90,6 @@ class SnatchController < ApplicationController
   def check_for_playlist
     if true
       list = get('me/playlists?limit=50')
-      # unless current_user
-      #   session[:p_name] = "Snatched"
-      # end
       list['items'].each do |x|
           if x['name'] === session[:p_name]
 
