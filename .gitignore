@@ -18,6 +18,7 @@
 !/tmp/.keep
 
 .DS_Store
+dry.rb
 
 /node_modules
 /yarn-error.log
