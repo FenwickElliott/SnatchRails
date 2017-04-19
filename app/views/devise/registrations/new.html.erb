@@ -1,43 +1,32 @@
-<% @title = "Edit profile" %>
+<% @title = "Sign up" %>
 
-<%= form_for(resource, as: resource_name, url: registration_path(resource_name), html: { method: :put }) do |f| %>
+<%= form_for(resource, as: resource_name, url: registration_path(resource_name)) do |f| %>
   <%= devise_error_messages! %>
 
   <div class="field">
     <%= f.label :email %><br />
-    <%= f.email_field :email, autofocus: true, class: 'form-control' %>
+    <%= f.email_field :email, autofocus: true, class: 'form-control', placeholder: "Enter email" %>
   </div>
-
-  <% if devise_mapping.confirmable? && resource.pending_reconfirmation? %>
-    <div>Currently waiting confirmation for: <%= resource.unconfirmed_email %></div>
-  <% end %>
-
+  <br />
   <div class="field">
-    <%= f.label :password %><br />
-    <%= f.password_field :password, autocomplete: "off", placeholder: "leave blank if you don't want to change it", class: 'form-control' %>
-  </div>
-
-  <div class="field">
-    <%= f.label :password_confirmation %><br />
+    <%= f.label :password %>
     <% if @minimum_password_length %>
-      <%= f.password_field :password_confirmation, autocomplete: "off", placeholder: "#{@minimum_password_length} characters minimum", class: 'form-control' %>
+      <%= f.password_field :password, autocomplete: "off", class: 'form-control', placeholder: "#{@minimum_password_length} characters minimum" %>
     <% else %>
-      <%= f.password_field :password_confirmation, autocomplete: "off", class: 'form-control' %>
+      <%= f.password_field :password, autocomplete: "off", class: 'form-control' %>
     <% end %>
   </div>
-
+  <br />
   <div class="field">
-    <%= f.label :current_password %><br />
-    <%= f.password_field :current_password, autocomplete: "off", placeholder: "we need your current password to confirm your changes", class: 'form-control' %>
+    <%= f.label :password_confirmation %><br />
+    <%= f.password_field :password_confirmation, autocomplete: "off", class: 'form-control', placeholder: "Password confirmation" %>
   </div>
+
+  <br />
 
   <div class="actions">
-    <%= f.submit "Update" %>
+    <%= f.submit "Sign up" %>
   </div>
 <% end %>
-
-<h3>Cancel my account</h3>
-
-<p>Unhappy? <%= button_to "Cancel my account", registration_path(resource_name), data: { confirm: "Are you sure?" }, method: :delete %></p>
-
-<%= link_to "Back", :back %>
+<br />
+<%= render "devise/shared/links" %>

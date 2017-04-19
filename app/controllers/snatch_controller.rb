@@ -18,6 +18,17 @@ class SnatchController < ApplicationController
   def options
   end
 
+  def update
+    if params[:session][:p_name] != ''
+      p_set = JSON.parse(current_user.settings)
+      p_set["p_name"] = params[:session][:p_name]
+      current_user.settings = p_set.to_json
+      current_user.save!
+    end
+    redirect_to options_path
+  end
+
+
   def link
     redirect_to "/auth/spotify"
   end
@@ -39,7 +50,20 @@ class SnatchController < ApplicationController
   end
 
   def snatch
-    redirect_to link_path
+    unless session[:user_id]
+      redirect_to "/auth/spotify"
+    end
+    session[:p_name] = JSON.parse(current_user.settings)["p_name"]
+    begin
+      get_song
+      check_for_playlist
+      check_through_playlist
+      # actually_snatch
+      redirect_to root_path
+    rescue
+      flash[:alert] = "Error snatching"
+      # redirect_to root_path
+    end
   end
 
   def get_me
@@ -61,11 +85,11 @@ class SnatchController < ApplicationController
   end
 
   def check_for_playlist
-    if session[:user_id]
+    if true
       list = get('me/playlists?limit=50')
-      unless current_user
-        session[:p_name] = "Snatched"
-      end
+      # unless current_user
+      #   session[:p_name] = "Snatched"
+      # end
       list['items'].each do |x|
           if x['name'] === session[:p_name]
 
@@ -74,17 +98,17 @@ class SnatchController < ApplicationController
             return
           end
         end
-        puts "check_for_playlist complete, #{current_user[:p_name]} not found, creating"
+        puts "check_for_playlist complete, playlist not found, creating"
         create_playlist
       end
-      puts "check_for_playlist complete, #{current_user[:p_name]} found"
+      puts "check_for_playlist complete, playlist found"
   end
 
   def create_playlist
     playlist = post("users/#{session[:user_id]}/playlists", {
       "description" => "Your Snatched Playlist",
       "public" => false,
-      "name" => "#{current_user[:p_name]}"
+      "name" => "#{session[:p_name]}"
     })
     session[:p_id] = playlist['id']
     puts "create_playlist complete #{current_user[:p_name]} playlist created. ID: #{session[:p_id]}"
