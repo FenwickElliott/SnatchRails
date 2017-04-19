@@ -17,6 +17,13 @@ class SnatchController < ApplicationController
       else
         session[:p_name] = "Snatched"
       end
+      if session[:g_que]
+        session[:g_que] = false
+        redirect_to guest_snatch_path
+      elsif session[:s_que]
+        session[:s_que]
+        redirect_to snatch_path
+      end
     end
   end
 
@@ -37,6 +44,7 @@ class SnatchController < ApplicationController
 
   def guest_snatch
     unless session[:user_id]
+      session[:g_que] = true
       redirect_to "/auth/spotify"
     end
       begin
@@ -51,6 +59,7 @@ class SnatchController < ApplicationController
 
   def snatch
     unless session[:user_id]
+      session[:s_que] = true
       redirect_to "/auth/spotify"
     end
     begin
