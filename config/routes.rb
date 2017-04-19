@@ -1,13 +1,17 @@
 Rails.application.routes.draw do
+  devise_for :users
   get 'snatch/about'
-
   get 'snatch/options'
-
   get 'snatch/link'
-
   get 'snatch/guest_snatch'
-
   get 'snatch/snatch'
 
-  # For details on the DSL available within this file, see http://guides.rubyonrails.org/routing.html
+  get 'snatch' => 'snatch#snatch'
+  get 'options' => 'snatch#options'
+  get 'link' => 'snatch#link'
+  get 'guest_snatch' => 'snatch#guest_snatch'
+
+  put 'snatch/options' => 'snatch#update'
+
+  root 'snatch#about'
 end

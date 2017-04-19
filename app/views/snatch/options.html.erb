@@ -1,2 +1,12 @@
-<h1>Snatch#options</h1>
-<p>Find me in app/views/snatch/options.html.erb</p>
+<% @title = "Options" %>
+
+<%= form_for( :session, html: { method: :put }) do |f| %>
+  <div class="field">
+    <%= f.label 'Playlist name:' %><br />
+    <%= f.text_field :p_name, autofocus: true, placeholder: "#{session[:p_name]}",  class: 'form-control' %>
+  </div>
+  <br />
+  <div class="field">
+    <%= f.submit "Update", class: 'btn btn-success' %>
+  </div>
+<% end %>
