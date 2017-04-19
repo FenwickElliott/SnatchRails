@@ -35,11 +35,6 @@ class SnatchController < ApplicationController
     redirect_to root_path
   end
 
-
-  def link
-    redirect_to "/auth/spotify"
-  end
-
   def guest_snatch
     unless session[:user_id]
       redirect_to "/auth/spotify"
@@ -58,7 +53,6 @@ class SnatchController < ApplicationController
     unless session[:user_id]
       redirect_to "/auth/spotify"
     end
-    
     begin
       get_song
       check_for_playlist
@@ -163,6 +157,4 @@ class SnatchController < ApplicationController
     end
     JSON.parse response.body
   end
-
-
 end
