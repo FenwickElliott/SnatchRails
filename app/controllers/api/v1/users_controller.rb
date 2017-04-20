@@ -11,8 +11,13 @@ class Api::V1::UsersController < Api::V1::BaseController
   end
 
   def index
-    puts "Hello"
-    render(json: {:method=>"index"}.to_json, status: 201)
+    puts SnatchController.example
+    # SnatchController.snatch
+    render(json: {:method=>"index", :note=>"#{SnatchController.example}"}.to_json, status: 201)
+  end
+
+  def custom
+    render(json: {:method=>"custom"}.to_json, status: 201)
   end
 
   def not_found

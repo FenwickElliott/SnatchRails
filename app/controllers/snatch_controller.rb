@@ -24,6 +24,10 @@ class SnatchController < ApplicationController
     end
   end
 
+  def self.example
+    note = "I'm in snatch!"
+  end
+
   def options
   end
 
@@ -39,7 +43,7 @@ class SnatchController < ApplicationController
     redirect_to root_path
   end
 
-  def snatch
+  def self.snatch
     unless session[:user_id]
       session[:que] = true
       redirect_to "/auth/spotify"
