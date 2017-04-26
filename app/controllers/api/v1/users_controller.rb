@@ -16,12 +16,24 @@ class Api::V1::UsersController < Api::V1::BaseController
     s_name = get('me/player/currently-playing')['item']['name']
     @ans << "Got song: #{s_name}\n"
 
+
+    # two line implemental runs faster than one line implimentation. Why?
+    settings = JSON.parse User.find(params[:id]).settings
+    @p_name = settings['p_name']
+    # p_name = JSON.parse(User.find(params[:id]).settings)['p_name']
+    @ans << "Got p_name: #{@p_name}\n"
+
+    # render json: p_name, status: 200
+
     check_for_playlist
 
     # unless snatch
     #   cycle_tokens
     #   snatch
     # end
+
+
+
     render json: @ans, status: 200
   end
 
@@ -54,14 +66,14 @@ class Api::V1::UsersController < Api::V1::BaseController
   def check_for_playlist
       list = get('me/playlists?limit=50')
       list['items'].each do |x|
-        if x['name'] === "PhoenixSnatch"
+        if x['name'] === @p_name
           p_id = x['id']
           @ans << "Playlist found, p_id: #{p_id}\n"
           return
         end
       end
-      puts "check_for_playlist complete, playlist not found, creating"
-      create_playlist
+      @ans << "check_for_playlist complete, playlist not found. Creating...\n"
+      # create_playlist
   end
 
 
