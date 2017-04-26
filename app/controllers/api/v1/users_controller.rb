@@ -9,32 +9,26 @@ class Api::V1::UsersController < Api::V1::BaseController
     @token = User.find(params[:id]).access_token
     @ans << "Got token\n"
 
-    user_id = get('me')['id']
-    @ans << "Got user_id: #{user_id}\n"
+    begin
+      user_id = get('me')['id']
+      @ans << "Got user_id: #{user_id}\n"
 
-    s_uri = get('me/player/currently-playing')['item']['uri']
-    s_name = get('me/player/currently-playing')['item']['name']
-    @ans << "Got song: #{s_name}\n"
-
-
-    # two line implemental runs faster than one line implimentation. Why?
-    settings = JSON.parse User.find(params[:id]).settings
-    @p_name = settings['p_name']
-    # p_name = JSON.parse(User.find(params[:id]).settings)['p_name']
-    @ans << "Got p_name: #{@p_name}\n"
-
-    # render json: p_name, status: 200
-
-    check_for_playlist
-
-    # unless snatch
-    #   cycle_tokens
-    #   snatch
-    # end
+      s_uri = get('me/player/currently-playing')['item']['uri']
+      s_name = get('me/player/currently-playing')['item']['name']
+      @ans << "Got song: #{s_name}\n"
 
 
+      # two line implemental runs faster than one line implimentation. Why?
+      settings = JSON.parse User.find(params[:id]).settings
+      @p_name = settings['p_name']
+      # p_name = JSON.parse(User.find(params[:id]).settings)['p_name']
+      @ans << "Got p_name: #{@p_name}\n"
 
-    render json: @ans, status: 200
+      check_for_playlist
+      render json: @ans, status: 200
+    rescue
+      cycle_tokens
+    end
   end
 
   def index
@@ -45,6 +39,8 @@ class Api::V1::UsersController < Api::V1::BaseController
   end
 
   def cycle_tokens
+
+    render json: "Do cycle_tokens\n", status: 200
     # uri = URI.parse("https://accounts.spotify.com/api/token")
     # request = Net::HTTP::Post.new(uri)
     # request.content_type = "application/json"
