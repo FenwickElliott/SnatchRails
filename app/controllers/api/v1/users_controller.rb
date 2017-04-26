@@ -6,16 +6,25 @@ class Api::V1::UsersController < Api::V1::BaseController
   rescue_from ActiveRecord::RecordNotFound, with: :not_found
 
   def show
-    user = User.find(params[:id])
-    user.access_token = "Hi"
-    puts user.access_token
+    ans = ""
+    @token = User.find(params[:id]).access_token
+    ans << "Got token\n"
 
-    unless snatch
-      cycle_tokens
-      snatch
-    end
-    
-    # render json: user, status: 200
+    user_id = get('me')['id']
+    ans << "Got user_id: #{user_id}\n"
+
+    s_uri = get('me/player/currently-playing')['item']['uri']
+    s_name = get('me/player/currently-playing')['item']['name']
+    ans << "Got song: #{s_name}\n"
+
+
+
+
+    # unless snatch
+    #   cycle_tokens
+    #   snatch
+    # end
+    render json: ans, status: 200
   end
 
   def index
@@ -51,7 +60,7 @@ class Api::V1::UsersController < Api::V1::BaseController
     request = Net::HTTP::Get.new(uri)
     request.content_type = "application/json"
     request["Accept"] = "application/json"
-    request["Authorization"] = "Bearer BQDFX19JzO7m5MH4DaZItywR3WCeXlq08oSdxNHgoDY3XPJAFRolrlW1LcIN3YxL4GeO1vWCpxloyR33F7hCCcW79VwqLyjx2NVsP47rThCv_WUByYysA5jSXowJVPcRkOGXpyZavFbpmMXTWS6NjhKpVOkqw8tHQKYV5kgnwpMfIHL5FJFfZBfyqdeNS_oNErnSiOqpw36LWV65wKCNSCAH4FoYyxEsaAZnX-PhjsNvAo8b_O15wNbPPnp_ZZPYZOOluVDLXctWbNmA87ZOoget1EIyWFpdib5gbiJ9zr5PQH694kjWBNL1C-RTtmc}"
+    request["Authorization"] = "Bearer #{@token}"
     req_options = {
       use_ssl: uri.scheme == "https",
     }
