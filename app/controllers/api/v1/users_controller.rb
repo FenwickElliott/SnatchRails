@@ -1,30 +1,28 @@
 class Api::V1::UsersController < Api::V1::BaseController
-
   require 'json'
   require 'net/http'
 
   rescue_from ActiveRecord::RecordNotFound, with: :not_found
 
   def show
-    ans = ""
+    @ans = ""
     @token = User.find(params[:id]).access_token
-    ans << "Got token\n"
+    @ans << "Got token\n"
 
     user_id = get('me')['id']
-    ans << "Got user_id: #{user_id}\n"
+    @ans << "Got user_id: #{user_id}\n"
 
     s_uri = get('me/player/currently-playing')['item']['uri']
     s_name = get('me/player/currently-playing')['item']['name']
-    ans << "Got song: #{s_name}\n"
+    @ans << "Got song: #{s_name}\n"
 
-
-
+    check_for_playlist
 
     # unless snatch
     #   cycle_tokens
     #   snatch
     # end
-    render json: ans, status: 200
+    render json: @ans, status: 200
   end
 
   def index
@@ -51,7 +49,19 @@ class Api::V1::UsersController < Api::V1::BaseController
   end
 
   def snatch
+  end
 
+  def check_for_playlist
+      list = get('me/playlists?limit=50')
+      list['items'].each do |x|
+        if x['name'] === "PhoenixSnatch"
+          p_id = x['id']
+          @ans << "Playlist found, p_id: #{p_id}\n"
+          return
+        end
+      end
+      puts "check_for_playlist complete, playlist not found, creating"
+      create_playlist
   end
 
 

@@ -78,7 +78,7 @@ class SnatchController < ApplicationController
   end
 
   def check_for_playlist
-    if true
+    # if true
       list = get('me/playlists?limit=50')
       list['items'].each do |x|
           if x['name'] === session[:p_name]
@@ -90,8 +90,8 @@ class SnatchController < ApplicationController
         end
         puts "check_for_playlist complete, playlist not found, creating"
         create_playlist
-      end
-      puts "check_for_playlist complete, playlist found"
+      # end
+      # puts "check_for_playlist complete, playlist found"
   end
 
   def create_playlist
