@@ -1,5 +1,6 @@
 Rails.application.routes.draw do
   devise_for :users
+  
   get 'snatch/about'
   get 'snatch/options'
   get 'snatch/snatch'

@@ -1,7 +1,6 @@
 class SnatchController < ApplicationController
   require 'json'
   require 'net/http'
-  require 'uri'
 
   def about
     if request.env['omniauth.auth']
@@ -11,9 +10,15 @@ class SnatchController < ApplicationController
         Accept: "application/json",
         Authorization: "Authorization: Bearer #{session[:token]}"
       }
+      current_user.access_token = session[:token]
+      current_user.refresh_token = session[:response][:credentials][:refresh_token]
+      current_user.save!
       get_me
       if current_user
         session[:p_name] = JSON.parse(current_user.settings)["p_name"]
+        current_user.access_token = session[:token]
+        current_user.refresh_token = session[:response][:credentials][:refresh_token]
+        current_user.save!
       else
         session[:p_name] = "Snatched"
       end
@@ -22,10 +27,6 @@ class SnatchController < ApplicationController
         redirect_to snatch_path
       end
     end
-  end
-
-  def self.example
-    note = "I'm in snatch!"
   end
 
   def options
@@ -43,7 +44,7 @@ class SnatchController < ApplicationController
     redirect_to root_path
   end
 
-  def self.snatch
+  def snatch
     unless session[:user_id]
       session[:que] = true
       redirect_to "/auth/spotify"
