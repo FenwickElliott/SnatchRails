@@ -6,8 +6,11 @@ class Api::V1::UsersController < Api::V1::BaseController
 
   def show
     @ans = ""
-    @token = User.find(params[:id]).access_token
+    @access_token = User.find(params[:id]).access_token
+    @refresh_token = User.find(params[:id]).refresh_token
     @ans << "Got token\n"
+
+    puts get('me')['id']
 
     begin
       user_id = get('me')['id']
@@ -39,24 +42,25 @@ class Api::V1::UsersController < Api::V1::BaseController
   end
 
   def cycle_tokens
+    uri = URI.parse("https://accounts.spotify.com/api/token")
+    request = Net::HTTP::Post.new(uri)
+    request["Authorization"] = "Basic ZWJkNTM1NDVlZTA0NGI3OGE2MTc5OTk4ZjBkZGZiNDA6MjIzMjY3ZmNmMjI0NGJhYWI1OTIwMDVjMzI4Y2E2Y2U="
+    request.set_form_data(
+      "grant_type" => "refresh_token",
+      "refresh_token" => @refresh_token,
+    )
+    req_options = {
+      use_ssl: uri.scheme == "https",
+    }
 
-    render json: "Do cycle_tokens\n", status: 200
-    # uri = URI.parse("https://accounts.spotify.com/api/token")
-    # request = Net::HTTP::Post.new(uri)
-    # request.content_type = "application/json"
-    # request["Accept"] = "application/json"
-    # request["Authorization"] = "Bearer #{session[:token]}"
-    # request.body = JSON.dump body
-    # req_options = {
-    #   use_ssl: uri.scheme == "https",
-    # }
-    # response = Net::HTTP.start(uri.hostname, uri.port, req_options) do |http|
-    #   http.request(request)
-    # end
-    # JSON.parse response.body
-  end
+    response = Net::HTTP.start(uri.hostname, uri.port, req_options) do |http|
+      http.request(request)
+    end
 
-  def snatch
+    @access_token = JSON.parse(response.body)['access_token']
+    
+
+    render json: response.code
   end
 
   def check_for_playlist
@@ -78,7 +82,7 @@ class Api::V1::UsersController < Api::V1::BaseController
     request = Net::HTTP::Get.new(uri)
     request.content_type = "application/json"
     request["Accept"] = "application/json"
-    request["Authorization"] = "Bearer #{@token}"
+    request["Authorization"] = "Bearer #{@access_token}"
     req_options = {
       use_ssl: uri.scheme == "https",
     }
