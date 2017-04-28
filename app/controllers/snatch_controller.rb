@@ -10,9 +10,6 @@ class SnatchController < ApplicationController
         Accept: "application/json",
         Authorization: "Authorization: Bearer #{session[:token]}"
       }
-      current_user.access_token = session[:token]
-      current_user.refresh_token = session[:response][:credentials][:refresh_token]
-      current_user.save!
       get_me
       if current_user
         session[:p_name] = JSON.parse(current_user.settings)["p_name"]

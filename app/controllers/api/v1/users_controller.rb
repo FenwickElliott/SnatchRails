@@ -5,12 +5,11 @@ class Api::V1::UsersController < Api::V1::BaseController
   rescue_from ActiveRecord::RecordNotFound, with: :not_found
 
   def show
+    @user = User.find(params[:id])
     @ans = ""
     @access_token = User.find(params[:id]).access_token
     @refresh_token = User.find(params[:id]).refresh_token
     @ans << "Got token\n"
-
-    puts get('me')['id']
 
     begin
       user_id = get('me')['id']
@@ -28,7 +27,7 @@ class Api::V1::UsersController < Api::V1::BaseController
       @ans << "Got p_name: #{@p_name}\n"
 
       check_for_playlist
-      render json: @ans, status: 200
+      render json: @ans
     rescue
       cycle_tokens
     end
@@ -42,6 +41,7 @@ class Api::V1::UsersController < Api::V1::BaseController
   end
 
   def cycle_tokens
+    puts "cycling tokens..."
     uri = URI.parse("https://accounts.spotify.com/api/token")
     request = Net::HTTP::Post.new(uri)
     request["Authorization"] = "Basic ZWJkNTM1NDVlZTA0NGI3OGE2MTc5OTk4ZjBkZGZiNDA6MjIzMjY3ZmNmMjI0NGJhYWI1OTIwMDVjMzI4Y2E2Y2U="
@@ -58,9 +58,11 @@ class Api::V1::UsersController < Api::V1::BaseController
     end
 
     @access_token = JSON.parse(response.body)['access_token']
-    
 
-    render json: response.code
+    @user.access_token = @access_token
+    @user.save!
+
+    render json: response
   end
 
   def check_for_playlist
