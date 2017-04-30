@@ -8,7 +8,12 @@ class Api::V1::UsersController < Api::V1::BaseController
     get_user_info
     get_song
     check_for_playlist
-    post("users/#{@user_id}/playlists/#{@p_id}/tracks?uris=#{@s_uri}")
+    if check_through_playlist
+      @ans << "That has already been snatched\n"
+    else
+      post("users/#{@user_id}/playlists/#{@p_id}/tracks?uris=#{@s_uri}")
+      @ans << "Snatched!!!\n"
+    end
   end
 
   def get_user_info
@@ -52,6 +57,16 @@ class Api::V1::UsersController < Api::V1::BaseController
     @ans << "create_playlist complete #{@p_name} playlist created. ID: #{@p_id}\n"
   end
 
+  def check_through_playlist
+    playlist = get("users/#{@user_id}/playlists/#{@p_id}/tracks")
+    for i in 0..(playlist['items'].length - 1)
+      if playlist['items'][i]['track']['uri'] === @s_uri
+        return true
+      end
+    end
+    return false
+  end
+  
   def show
     @ans = ""
     @user = User.find(params[:id])
