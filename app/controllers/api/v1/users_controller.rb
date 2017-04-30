@@ -8,6 +8,7 @@ class Api::V1::UsersController < Api::V1::BaseController
     get_user_info
     get_song
     check_for_playlist
+    post("users/#{@user_id}/playlists/#{@p_id}/tracks?uris=#{@s_uri}")
   end
 
   def get_user_info
@@ -22,9 +23,9 @@ class Api::V1::UsersController < Api::V1::BaseController
   end
 
   def get_song
-    s_uri = get('me/player/currently-playing')['item']['uri']
-    s_name = get('me/player/currently-playing')['item']['name']
-    @ans << "Got song: #{s_name}\n"
+    @s_uri = get('me/player/currently-playing')['item']['uri']
+    @s_name = get('me/player/currently-playing')['item']['name']
+    @ans << "Got song: #{@s_name}\n"
   end
 
   def check_for_playlist
@@ -32,8 +33,8 @@ class Api::V1::UsersController < Api::V1::BaseController
     list['items'].each do |x|
     # get('me/playlists?limit=50')'items'].each do |x|
       if x['name'] === @p_name
-        p_id = x['id']
-        @ans << "Playlist found, p_id: #{p_id}\n"
+        @p_id = x['id']
+        @ans << "Playlist found, p_id: #{@p_id}\n"
         return
       end
     end
