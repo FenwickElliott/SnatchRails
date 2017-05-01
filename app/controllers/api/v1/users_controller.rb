@@ -4,6 +4,23 @@ class Api::V1::UsersController < Api::V1::BaseController
   require 'base64'
 
   rescue_from ActiveRecord::RecordNotFound, with: :not_found
+  before_action :authenticate
+
+  def show
+    @ans = ""
+    @user = User.find(params[:id])
+    @access_token = User.find(params[:id]).access_token
+    begin
+      @ans << "Got token\n"
+      snatch
+      render json: @ans
+    rescue
+      @ans << "Token Refreshed\n"
+      cycle_tokens
+      snatch
+      render json: @ans
+    end
+  end
 
   def snatch
     get_user_info
@@ -67,22 +84,6 @@ class Api::V1::UsersController < Api::V1::BaseController
     end
     return false
   end
-  
-  def show
-    @ans = ""
-    @user = User.find(params[:id])
-    @access_token = User.find(params[:id]).access_token
-    begin
-      @ans << "Got token\n"
-      snatch
-      render json: @ans
-    rescue
-      @ans << "Token Refreshed"
-      cycle_tokens
-      snatch
-      render json: @ans
-    end
-  end
 
   def index
   end
@@ -140,5 +141,12 @@ class Api::V1::UsersController < Api::V1::BaseController
       http.request(request)
     end
     JSON.parse response.body
+  end
+
+  protected
+  def authenticate
+    authenticate_or_request_with_http_token do |token, options|
+      User.find_by(auth_token: token)
+    end
   end
 end

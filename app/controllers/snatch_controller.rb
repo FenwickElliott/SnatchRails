@@ -13,12 +13,9 @@ class SnatchController < ApplicationController
       get_me
       if current_user
         session[:p_name] = JSON.parse(current_user.settings)["p_name"]
-        # unless current_user.refresh_token
-        if current_user.refresh_token == null
-          current_user.access_token = session[:token]
-          current_user.refresh_token = session[:response][:credentials][:refresh_token]
-          current_user.save!
-        end
+        current_user.access_token = session[:token]
+        current_user.refresh_token = session[:response][:credentials][:refresh_token]
+        current_user.save!
       else
         session[:p_name] = "Snatched"
       end
