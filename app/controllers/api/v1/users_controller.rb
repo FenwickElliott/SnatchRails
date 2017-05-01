@@ -1,6 +1,7 @@
 class Api::V1::UsersController < Api::V1::BaseController
   require 'json'
   require 'net/http'
+  require 'base64'
 
   rescue_from ActiveRecord::RecordNotFound, with: :not_found
 
@@ -94,7 +95,7 @@ class Api::V1::UsersController < Api::V1::BaseController
     puts "cycling tokens..."
     uri = URI.parse("https://accounts.spotify.com/api/token")
     request = Net::HTTP::Post.new(uri)
-    request["Authorization"] = "Basic ZWJkNTM1NDVlZTA0NGI3OGE2MTc5OTk4ZjBkZGZiNDA6MjIzMjY3ZmNmMjI0NGJhYWI1OTIwMDVjMzI4Y2E2Y2U="
+    request["Authorization"] = "Basic " << Base64.strict_encode64("#{ENV['SPOTIFY_CLIENT_ID']}:#{ENV['SPOTIFY_CLIENT_SECRET']}").to_s
     request.set_form_data(
       "grant_type" => "refresh_token",
       "refresh_token" => User.find(params[:id]).refresh_token
