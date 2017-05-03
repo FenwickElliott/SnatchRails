@@ -54,8 +54,11 @@
         <li><%= link_to "About", root_path %></li>
         <% if current_user %>
           <li><%= link_to "Options", options_path %></li>
+          <li><%= link_to "Snatch!", snatch_path %></li>
+        <% else %>
+          <li><%= link_to "Snatch as Guest!", guest_snatch_path %></li>
         <% end %>
-        <li><%= link_to "Snatch!", snatch_path %></li>
+        
       </div>
 
     <div class='row'>
