@@ -1,6 +1,7 @@
 class SnatchController < ApplicationController
   require 'json'
   require 'net/http'
+  require 'base64'
 
   def link
     if request.env['omniauth.auth']
@@ -50,13 +51,17 @@ class SnatchController < ApplicationController
   end
 
   def snatch
+    session[:user_id] = get('me')['id']
+     if @status == 401.to_s
+      cycle_tokens
+    end
     begin
       session[:user_id] = get('me')['id']
       get_song
       check_for_playlist
       actually_snatch
     rescue
-      puts "Rescued"
+      puts "Rescued from snatch"
     end
     redirect_to root_path
   end
@@ -92,14 +97,14 @@ class SnatchController < ApplicationController
       session[:p_name] = "Snatched"
     end
     get('me/playlists?limit=50')['items'].each do |x|
-        if x['name'] === session[:p_name]
-          puts x['name'] << ' Playlist found'
-          session[:p_id] = x['id']
-          return
-        end
+      if x['name'] === session[:p_name]
+        puts x['name'] << ' Playlist found'
+        session[:p_id] = x['id']
+        return
       end
-      puts "check_for_playlist complete, playlist not found, creating"
-      create_playlist
+    end
+    puts "check_for_playlist complete, playlist not found, creating"
+    create_playlist
   end
 
   def create_playlist
@@ -141,8 +146,9 @@ class SnatchController < ApplicationController
     response = Net::HTTP.start(uri.hostname, uri.port, req_options) do |http|
       http.request(request)
     end
+    @status = response.code
     JSON.parse response.body
-  end
+    end
 
   def post(endpoint, body = {})
     uri = URI.parse("https://api.spotify.com/v1/#{endpoint}")
@@ -162,5 +168,24 @@ class SnatchController < ApplicationController
       http.request(request)
     end
     JSON.parse response.body
+  end
+
+  def cycle_tokens
+    puts "cycling tokens..."
+    uri = URI.parse("https://accounts.spotify.com/api/token")
+    request = Net::HTTP::Post.new(uri)
+    request["Authorization"] = "Basic " << Base64.strict_encode64("#{ENV['SPOTIFY_CLIENT_ID']}:#{ENV['SPOTIFY_CLIENT_SECRET']}").to_s
+    request.set_form_data(
+      "grant_type" => "refresh_token",
+      "refresh_token" => current_user.refresh_token
+    )
+    req_options = {
+      use_ssl: uri.scheme == "https",
+    }
+    response = Net::HTTP.start(uri.hostname, uri.port, req_options) do |http|
+      http.request(request)
+    end
+    current_user.access_token = JSON.parse(response.body)['access_token']
+    current_user.save!
   end
 end
