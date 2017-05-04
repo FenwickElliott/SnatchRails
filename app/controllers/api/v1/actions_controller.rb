@@ -1,4 +1,4 @@
-class Api::V1::UsersController < Api::V1::BaseController
+class Api::V1::ActionsController < Api::V1::BaseController
   require 'json'
   require 'net/http'
   require 'base64'
@@ -6,23 +6,22 @@ class Api::V1::UsersController < Api::V1::BaseController
   rescue_from ActiveRecord::RecordNotFound, with: :not_found
   before_action :authenticate
 
-  def show
-    @ans = ""
-    @user = User.find(params[:id])
-    @access_token = User.find(params[:id]).access_token
+  def snatch
+    @ans = "snatching...\n"
+    @access_token = @user.access_token
     begin
-      @ans << "Got token\n"
-      snatch
+      @ans << "Got token: #{@access_token}\n"
+      actually_snatch
       render json: @ans
     rescue
-      @ans << "Token Refreshed\n"
       cycle_tokens
-      snatch
+      @ans << "Token Refreshed: #{@access_token}\n"
+      actually_snatch
       render json: @ans
     end
   end
 
-  def snatch
+  def actually_snatch
     get_user_info
     get_song
     check_for_playlist
@@ -37,11 +36,7 @@ class Api::V1::UsersController < Api::V1::BaseController
   def get_user_info
     @user_id = get('me')['id']
     @ans << "Got @user_id: #{@user_id}\n"
-
-    # two line implemental runs faster than one line implimentation. Why?
-    settings = JSON.parse User.find(params[:id]).settings
-    @p_name = settings['p_name']
-    # p_name = JSON.parse(User.find(params[:id]).settings)['p_name']
+    @p_name = JSON.parse(@user.settings)['p_name']
     @ans << "Got p_name: #{@p_name}\n"
   end
 
@@ -52,9 +47,7 @@ class Api::V1::UsersController < Api::V1::BaseController
   end
 
   def check_for_playlist
-    list = get('me/playlists?limit=50')
-    list['items'].each do |x|
-    # get('me/playlists?limit=50')['items'].each do |x|
+    get('me/playlists?limit=50')['items'].each do |x|
       if x['name'] === @p_name
         @p_id = x['id']
         @ans << "Playlist found, p_id: #{@p_id}\n"
@@ -85,9 +78,6 @@ class Api::V1::UsersController < Api::V1::BaseController
     return false
   end
 
-  def index
-  end
-
   def not_found
     return api_error(status: 404, errors: 'Not found')
   end
@@ -99,7 +89,7 @@ class Api::V1::UsersController < Api::V1::BaseController
     request["Authorization"] = "Basic " << Base64.strict_encode64("#{ENV['SPOTIFY_CLIENT_ID']}:#{ENV['SPOTIFY_CLIENT_SECRET']}").to_s
     request.set_form_data(
       "grant_type" => "refresh_token",
-      "refresh_token" => User.find(params[:id]).refresh_token
+      "refresh_token" => @user.refresh_token
     )
     req_options = {
       use_ssl: uri.scheme == "https",
@@ -143,10 +133,14 @@ class Api::V1::UsersController < Api::V1::BaseController
     JSON.parse response.body
   end
 
+  def not_found
+    return api_error(status: 404, errors: 'Not found')
+  end
+
   protected
   def authenticate
     authenticate_or_request_with_http_token do |token, options|
-      User.find_by(auth_token: token)
+      @user = User.find_by(auth_token: token)
     end
   end
 end
