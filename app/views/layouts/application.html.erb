@@ -11,29 +11,30 @@
   <body>
     <% if flash[:notice] %>
       <div class="alert alert-success">
-      <button type="button" class="close" data-dismiss="alert">&times;</button>
-      <%= flash[:notice] %>
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+        <%= flash[:notice] %>
       </div>
     <% elsif flash.now[:alert] %>
       <div class="alert alert-danger">
-      <button type="button" class="close" data-dismiss="alert">&times;</button>
-      <%= flash.now[:alert] %>
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+        <%= flash.now[:alert] %>
       </div>
     <% elsif flash[:alert] %>
       <div class="alert alert-warning">
-      <button type="button" class="close" data-dismiss="alert">&times;</button>
-      <%= flash[:alert] %>
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+        <%= flash[:alert] %>
       </div>
     <% else %>
-      <% if session[:user_id] %>
-        <div class="alert alert-success">
-        <button type="button" class="close" data-dismiss="alert">&times;</button>
-        <%= "Linked as #{session[:user_id]}! You are ready to go!" %>
-        </div>
-      <% else %>
+      <% if current_user %>
       <div class="alert alert-success">
         <button type="button" class="close" data-dismiss="alert">&times;</button>
-        <%= "The first time you snatch you will need to log in with spotify" %>
+        <%= "Linked as #{JSON.parse(current_user.settings)['user_id']}! You are ready to go!" %>
+      <%# end %>
+      </div>
+      <% else %>
+      <div class="alert alert-success">
+          <button type="button" class="close" data-dismiss="alert">&times;</button>
+          <%= "The first time you snatch you will need to log in with spotify" %>
         </div>
       <% end %>
     <% end %>
