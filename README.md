@@ -1,24 +1,10 @@
-# README
+# Snatch
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+Snatch is a Rails web app with one simple function, to add whichever song is currently playing on Spotify to a designated playlist.
 
-Things you may want to cover:
+It works by first first asking for Spotify account access through OAuth, then using the resulting keys to consume the Spotify API, query the currently playing song and the user's playlists then depending on the results:
 
-* Ruby version
+* Create a playlist if one with the designated name is not found.
+* Add the song to the playlist and flash a positive result message.
+* Don't add the song and flash a negative result message because the song was already present in the playlist.
 
-* System dependencies
-
-* Configuration
-
-* Database creation
-
-* Database initialization
-
-* How to run the test suite
-
-* Services (job queues, cache servers, search engines, etc.)
-
-* Deployment instructions
-
-* ...
